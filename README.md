@@ -53,7 +53,7 @@ $ python3 get-organizationID.py -i org/organizations.json --org "iot ras"
     - Description: set something meaningful like "Migration: CUSTOMER orgName"
     - For All **Permissions** choose **ALL**
     - Click save
-    - Copy the **Key ID** and **Access token** to thew configuration file
+    - Copy the **Key ID** and **Access token** to the configuration file
     
 
 # Migration
