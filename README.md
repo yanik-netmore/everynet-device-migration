@@ -60,7 +60,7 @@ $ python3 get-organizationID.py -i org/organizations.json --org "iot ras"
 
 
 - Create the mass import file:
-  - e.g with connectivity plan named **actility-tpe-cs/tpe-cp-pr** and Connection ASID named TUTU
+  - e.g with connectivity plan named **actility-tpe-cs/tpe-cp-pr** and Connection ASID named **TUTU**
     - All the results with be in **config["outputdir"]**
       - all.import.csv: To import in TPW impersonating the Subscriber
       - all.delete.csv: To mass delete if needed
@@ -77,9 +77,14 @@ python3 extract-everynet-devices-info.py -c migration.sample.json --cp actility-
 ```
 cp all.import.csv all.import.csv.org
 ```
-- Update the all.import.csv so the TUTTU ASID becomes ASID from tuple DevEUI,ConnectionID
+- Update the all.import.csv so the **TUTU** ASID becomes ASID from tuple DevEUI,ConnectionID
   - This is not automated yet
   - Can be time consuming to do on bigger batch
+
+
+- in TPW after impersonate the destination subscriber, open **Things Manager** tab
+- Choose **Devices** then **Bulk Operations**
+- Click on the *paperclip icon* and Browse to your **all.import.csv**
   
   
   
