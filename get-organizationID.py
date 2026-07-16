@@ -44,14 +44,18 @@ def main() -> int:
         return 1
 
     needle = args.org.lower()
-    matches = [o for o in orgs if isinstance(o, dict) and needle in o.get("name", "").lower()]
+    total = len(orgs)
+    matches = [
+        (i + 1, o) for i, o in enumerate(orgs)
+        if isinstance(o, dict) and needle in o.get("name", "").lower()
+    ]
 
     if not matches:
         print(f"No organization found matching '{args.org}'.", file=sys.stderr)
         return 1
 
-    for org in matches:
-        print(f"{org['id']}\t{org['name']}")
+    for pos, org in matches:
+        print(f"{org['id']}\t{org['name']}\t({pos}/{total})")
 
     return 0
 
