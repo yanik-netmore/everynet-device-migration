@@ -42,7 +42,7 @@ python3 get-organizations.py -c migration.sample.json --output-dir org
 
 ```
 $ python3 get-organizationID.py -i org/organizations.json --org "iot ras"
-5d2eee4acc613a00014b9c49	IoT RAS
+5d2eee4acc613a00014b9c49	IoT RAS	(74/210)
 ```
 
 - For each organizationID create a key in https://ns.eu.everynet.io/keys
