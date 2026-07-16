@@ -97,6 +97,8 @@ cp all.import.csv all.import.csv.org
 - in TPW after impersonate the destination subscriber, open **Things Manager** tab
 - Choose **Devices** then **Bulk Operations**
 - Click on the *paperclip icon* and Browse to your **all.import.csv**
+- Click **Import** and wait
+
   
   
   
