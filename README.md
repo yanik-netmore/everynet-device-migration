@@ -46,16 +46,16 @@ $ python3 get-organizationID.py -i org/organizations.json --org "iot ras"
 ```
 
 - For each organizationID create a key in https://ns.eu.everynet.io/keys
-  - Details:
-    - User: Administrator
-    - Organisation ID: Unfortunately no search possible, and no sorting possible, scroll until you find the organisationName
-      - Double check if the ID displayed match the ID of the previous step
-    - Description: set something meaningful like "Migration: CUSTOMER orgName"
-    - For All **Permissions** choose **ALL**
-    - Click save
-    - Copy the **Key ID** and **Access token** to the configuration file
+  - ~~Details:~~
+    - ~~User: Administrator~~
+    - ~~Organisation ID: Unfortunately no search possible, and no sorting possible, scroll until you find the organisationName~~
+      - ~~Double check if the ID displayed match the ID of the previous step~~
+    - ~~Description: set something meaningful like "Migration: CUSTOMER orgName"~~
+    - ~~For All **Permissions** choose **ALL**~~
+    - ~~Click save~~
+    - ~~Copy the **Key ID** and **Access token** to the configuration file~~
 
--OR- use **organization-apikey.py** with *user_id* being the administrator user_id you can find in the GUI.
+use **organization-apikey.py** with *user_id* being the Administrator user_id you can find in the GUI.
 The tool produce the JSON line for this organisationID you will need to add to the *orgs* in **migration.sample.json**
 
 ```
