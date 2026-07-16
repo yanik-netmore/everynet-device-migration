@@ -54,7 +54,19 @@ $ python3 get-organizationID.py -i org/organizations.json --org "iot ras"
     - For All **Permissions** choose **ALL**
     - Click save
     - Copy the **Key ID** and **Access token** to the configuration file
-    
+
+-OR- use **organization-apikey.py** with *user_id* being the administrator user_id you can find in the GUI.
+The tool produce the JSON line for this organisationID you will need to add to the *orgs* in **migration.sample.json**
+
+```
+python3 organization-apikey.py -c migration.sample.json --org 665705abc2e7xxxxxxxxxxxx --name "First_ORG" --user_id 59bdxxxxxxxxxxxxxxxxxxxx
+KeyID : 6a58727990xxxxxxxxxxxxxx
+UserID: 59bdxxxxxxxxxxxxxxxxxxxx
+OrgID : 665705abc2e7xxxxxxxxxxxx
+Token : e202cebbb25e400xxxxxxxxxxxxxxxxx
+
+{"orgID": "665705abc2e7xxxxxxxxxxxx", "name": "First_ORG", "keyID": "6a58727990xxxxxxxxxxxxxx", "apiToken": "e202cebbb25e400xxxxxxxxxxxxxxxxx"}
+```
 
 # Migration
 
