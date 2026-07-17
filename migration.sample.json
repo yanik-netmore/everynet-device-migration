@@ -5,11 +5,20 @@
   "suspend_list": "deveuis-list.csv",
   "suspend_retries": 3,
   "suspend_progress": "patch_progress.txt",
-  "url": "https://ns.eu.everynet.io/api/v1.0/devices",
   "limit": 100,
   "outputdir": "subdirectory",
   "orgs": [
-    {"orgID": "665705abc2e7xxxxxxxxxxxx", "name": "First_ORG", "keyID": "6a1e95ab2cb898xxxxxxxx", "apiToken": "xxxxxx"},
-    {"orgID": "642566a60675xxxxxxxxxxxx", "name": "Second_ORG", "keyID": "6a1e9532906bfxxxxxxxzx", "apiToken": "yyyy"}
+    {
+      "orgID": "665705abc2e7xxxxxxxxxxxx",
+      "name": "First_ORG",
+      "keyID": "6a1e95ab2cb898xxxxxxxx",
+      "apiToken": "xxxxxx"
+    },
+    {
+      "orgID": "642566a60675xxxxxxxxxxxx",
+      "name": "Second_ORG",
+      "keyID": "6a1e9532906bfxxxxxxxzx",
+      "apiToken": "yyyy"
+    }
   ]
 }

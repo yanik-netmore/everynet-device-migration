@@ -248,9 +248,10 @@ def load_config(config_path):
   with open(config_path, 'r') as fp:
     config = json.load(fp)
 
-  url = config.get('url')
-  if not url:
-    raise ValueError("Config must contain 'url'.")
+  fqdn = config.get('fqdn')
+  if not fqdn:
+    raise ValueError("Config must contain 'fqdn'.")
+  config['url'] = f"https://{fqdn}/api/v1.0/devices"
 
   limit = config.get('limit')
   if not isinstance(limit, int) or limit <= 0:
