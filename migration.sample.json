@@ -2,9 +2,9 @@
   "fqdn": "ns.eu.everynet.io",
   "username": "EMAIL",
   "password": "PASSWORD",
-  "suspend_list": "deveuis-list.csv",
+  "suspend_list": "subdirectory/deveuis-list.csv",
   "suspend_retries": 3,
-  "suspend_progress": "patch_progress.txt",
+  "suspend_progress": "subdirectory/patch_progress.txt",
   "limit": 100,
   "outputdir": "subdirectory",
   "orgs": [
