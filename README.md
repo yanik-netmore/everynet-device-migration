@@ -93,7 +93,8 @@ cp all.import.csv all.import.csv.org
   - Can be time consuming to do on bigger batch
 
 
-- in TPW after impersonate the destination subscriber, open **Things Manager** tab
+- Log to TPE EU in the admin portal as an **operator**
+- After impersonating the destination subscriber, open **Things Manager** tab
 - Choose **Devices** then **Bulk Operations**
 - Click on the *paperclip icon* and Browse to your **all.import.csv**
 - Click **Import** and wait
