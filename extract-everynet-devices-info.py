@@ -70,13 +70,23 @@ def slugify(value):
   return slug or 'org'
 
 
-def format_counter(value):
+def format_counter(value, add_count=0, is_down=False):
+  """Format counters, reset -1 to 0, and optionally add to FCNT_Down."""
   if pd.isna(value):
     return ''
   try:
     number = float(value)
   except (TypeError, ValueError):
     return str(value)
+
+  # Reset -1 to 0
+  if number == -1:
+    number = 0
+
+  # Add configuratble count to FCNT_Down
+  if is_down:
+    number += add_count
+
   if number.is_integer():
     return str(int(number))
   return str(number)
@@ -103,12 +113,17 @@ def tpe_profile(row):
     return f"CREATE_{activation}"
   return 'CREATE_OTAA'
 
+def safe_get(row, key):
+    val = row.get(key, '')
+    if pd.isna(val):
+        return ''
+    return val
 
-def build_tpe_create_otaa_row(row, cp_value='', as_value='', rf2_value=''):
+def build_tpe_create_otaa_row(row, cp_value='', as_value='', rf2_value='', add_count=0):
   return [
     'CREATE_OTAA',
     row.get('DevEUI', ''),
-    row.get('Dev_Addr', ''),
+    safe_get(row, 'Dev_addr'),
     'LORA/GenericA.1.0.2c_ETSI',
     row.get('AppEUI', ''),
     row.get('AppKey', ''),
@@ -135,7 +150,7 @@ def build_tpe_create_otaa_row(row, cp_value='', as_value='', rf2_value=''):
     '',
     format_tags(row.get('Tags', '')),
     '',
-    format_counter(row.get('FCNT_Down', '')),
+    format_counter(row.get('FCNT_Down', ''), add_count, is_down=True),
     format_counter(row.get('FCNT_UP', '')),
     '',
     rf2_value,
@@ -145,12 +160,12 @@ def build_tpe_create_otaa_row(row, cp_value='', as_value='', rf2_value=''):
     '',
     '',
     '',
-    row.get('NWKSKey', ''),
-    row.get('APPSkey', '')
+    safe_get(row, 'NWKSKey'),
+    safe_get(row, 'APPSkey')
   ]
 
 
-def build_tpe_create_abp_row(row, cp_value='', as_value='', rf2_value=''):
+def build_tpe_create_abp_row(row, cp_value='', as_value='', rf2_value='', add_count=0):
   return [
     'CREATE_ABP',
     row.get('DevEUI', ''),
@@ -181,7 +196,7 @@ def build_tpe_create_abp_row(row, cp_value='', as_value='', rf2_value=''):
     '',
     format_tags(row.get('Tags', '')),
     '',
-    format_counter(row.get('FCNT_Down', '')),
+    format_counter(row.get('FCNT_Down', ''), add_count, is_down=True),
     format_counter(row.get('FCNT_UP', '')),
     '',
     rf2_value,
@@ -192,10 +207,10 @@ def build_tpe_create_abp_row(row, cp_value='', as_value='', rf2_value=''):
   ]
 
 
-def build_tpe_create_row(row, cp_value='', as_value='', rf2_value=''):
+def build_tpe_create_row(row, cp_value='', as_value='', rf2_value='', add_count=0):
   if tpe_profile(row) == 'CREATE_ABP':
-    return build_tpe_create_abp_row(row, cp_value, as_value, rf2_value)
-  return build_tpe_create_otaa_row(row, cp_value, as_value, rf2_value)
+    return build_tpe_create_abp_row(row, cp_value, as_value, rf2_value, add_count)
+  return build_tpe_create_otaa_row(row, cp_value, as_value, rf2_value, add_count)
 
 
 def build_tpe_delete_row(row):
@@ -215,7 +230,7 @@ def load_tpe_create_template_rows():
   return rows
 
 
-def write_tpe_outputs(all_df, outputdir, cp_value='', as_value='', rf2_value=''):
+def write_tpe_outputs(all_df, outputdir, cp_value='', as_value='', rf2_value='', add_count=0):
   import_csvname = os.path.join(outputdir, 'all.import.csv')
   create_csvname = os.path.join(outputdir, 'all.create.csv')
   delete_csvname = os.path.join(outputdir, 'all.delete.csv')
@@ -223,7 +238,7 @@ def write_tpe_outputs(all_df, outputdir, cp_value='', as_value='', rf2_value='')
   with open(import_csvname, 'w', newline='') as fp:
     wr = csv.writer(fp, dialect='excel')
     for _, row in all_df.iterrows():
-      wr.writerow(build_tpe_create_row(row, cp_value, as_value, rf2_value))
+      wr.writerow(build_tpe_create_row(row, cp_value, as_value, rf2_value, add_count))
 
   deveui_csvname = os.path.join(outputdir, 'deveui-list.csv')
   with open(deveui_csvname, 'w', newline='') as fp:
@@ -236,7 +251,7 @@ def write_tpe_outputs(all_df, outputdir, cp_value='', as_value='', rf2_value='')
     for row in load_tpe_create_template_rows():
       wr.writerow(row)
     for _, row in all_df.iterrows():
-      wr.writerow(build_tpe_create_row(row, '', as_value, rf2_value))
+      wr.writerow(build_tpe_create_row(row, '', as_value, rf2_value, add_count))
 
   with open(delete_csvname, 'w', newline='') as fp:
     wr = csv.writer(fp, dialect='excel')
@@ -425,6 +440,12 @@ def build_parser():
     default='',
     help="Set the TPE RF2 column in all.create.csv. Defaults to 869.525 when used without a value."
   )
+  parser.add_argument(
+    '--addCount',
+    type=int,
+    default=0,
+    help="Value to add to FCNT_Down. Defaults is 0."
+  )
   return parser
 
 
@@ -447,10 +468,10 @@ def main():
   if all_frames:
     all_df = pd.concat(all_frames, ignore_index=True)
     all_df.to_csv(all_csvname, index=False)
-    write_tpe_outputs(all_df, config['outputdir'], args.cp, args.as_value, rf2_value)
+    write_tpe_outputs(all_df, config['outputdir'], args.cp, args.as_value, rf2_value, args.addCount)
   else:
     pd.DataFrame().to_csv(all_csvname, index=False)
-    write_tpe_outputs(pd.DataFrame(), config['outputdir'], args.cp, args.as_value, rf2_value)
+    write_tpe_outputs(pd.DataFrame(), config['outputdir'], args.cp, args.as_value, rf2_value, args.addCount)
 
   log_line("Device extraction completed.")
 
