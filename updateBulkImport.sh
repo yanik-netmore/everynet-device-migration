@@ -38,6 +38,7 @@ ts_reports=0
 
 echo "Script started at: $(date)"
 
+declare -A map
 declare -A seen_csv2
 declare -A seen_csv1
 missing_in_csv1=()
@@ -46,9 +47,6 @@ missing_in_csv1=()
 # Load CSV2 (mapping list)
 # -----------------------------
 t0=$(date +%s)
-
-MAPFILE="$OUT_DIR/map.tmp"
-: > "$MAPFILE"
 
 while IFS=, read -r deveui tags || [[ -n "$deveui" ]]; do
     deveui=$(sanitize "$deveui")
@@ -62,58 +60,40 @@ while IFS=, read -r deveui tags || [[ -n "$deveui" ]]; do
         tags="\"$tags\""
     fi
 
+    map["$deveui"]="$tags"
     seen_csv2["$deveui"]=1
-    echo "$deveui,$tags" >> "$MAPFILE"
 done < "$CSV2"
 
 t1=$(date +%s)
 ts_load_csv2=$((t1 - t0))
 
-CPU_CORES=$(nproc)
-WORKERS=$(( CPU_CORES * 2 ))
-log_debug "Parallel workers: $WORKERS"
-
 # -----------------------------
-# Process CSV1 in parallel
+# Process CSV1 (serial, safe)
 # -----------------------------
 t0=$(date +%s)
 
-# Ensure output file is empty WITHOUT writing a blank line
 > "$OUT"
 
-export MAPFILE
+while IFS= read -r line || [[ -n "$line" ]]; do
+    # Extract DevEUI from column 2
+    deveui_raw=$(echo "$line" | cut -d',' -f2)
+    deveui=$(sanitize "$deveui_raw")
 
-cat "$CSV1" | \
-xargs -P "$WORKERS" -I{} bash -c '
-line="$1"
-
-deveui_raw=$(echo "$line" | cut -d"," -f2)
-deveui=$(echo -n "$deveui_raw" | tr -d "\r\n\t \"" | sed "s/[^a-fA-F0-9]//g")
-
-tag=$(grep -Fm1 "$deveui," "$MAPFILE" | sed -e "s/^[^,]*,//")
-
-if [[ -n "$tag" ]]; then
-    echo "${line//TUTU/$tag}"
-else
-    echo "__REMOVE__,$deveui"
-fi
-' _ "{}" > "$OUT.tmp"
-
-while IFS= read -r line; do
-    if [[ "$line" == __REMOVE__* ]]; then
-        deveui="${line#*,}"
-        deveui=$(sanitize "$deveui")
-        missing_in_csv1+=("$deveui")
-        seen_csv1["$deveui"]=1
-    else
-        deveui_raw=$(echo "$line" | cut -d"," -f2)
-        deveui=$(sanitize "$deveui_raw")
+    if [[ -n "$deveui" && -v map[$deveui] ]]; then
+        # Replace ALL occurrences of TUTU with the mapped tag
+        tag="${map[$deveui]}"
+        line="${line//TUTU/$tag}"
         seen_csv1["$deveui"]=1
         echo "$line" >> "$OUT"
+    else
+        # DevEUI not found in mapping → mark as missing
+        if [[ -n "$deveui" ]]; then
+            missing_in_csv1+=("$deveui")
+            seen_csv1["$deveui"]=1
+        fi
+        # ⚠️ Do NOT echo the line if DevEUI missing in CSV2
     fi
-done < "$OUT.tmp"
-
-rm -f "$OUT.tmp" "$MAPFILE"
+done < "$CSV1"
 
 t1=$(date +%s)
 ts_process_csv1=$((t1 - t0))
@@ -129,7 +109,7 @@ CSV2_NAME="$(basename "$CSV2" .csv)"
 if (( ${#missing_in_csv1[@]} > 0 )); then
     FILE="$OUT_DIR/missing_in_${CSV2_NAME}.txt"
     printf '%s\n' "${missing_in_csv1[@]}" > "$FILE"
-    echo "DevEUIs in CSV1 but not found in CSV2 (removed) → $FILE"
+    echo "DevEUIs in CSV1 but not found in CSV2 (removed from output) → $FILE"
 else
     echo "All DevEUIs in CSV1 were present in CSV2."
 fi
@@ -160,10 +140,8 @@ total=$((ts_end - ts_start))
 
 echo "---- Performance Profile ----"
 echo "Load CSV2 mapping: ${ts_load_csv2}s"
-echo "Process CSV1 (parallel): ${ts_process_csv1}s"
+echo "Process CSV1 (serial): ${ts_process_csv1}s"
 echo "Generate reports: ${ts_reports}s"
 echo "Total runtime: ${total}s"
-echo "CPU cores: $CPU_CORES"
-echo "Parallel workers: $WORKERS"
 echo "-----------------------------"
 

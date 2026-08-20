@@ -123,7 +123,7 @@ def build_tpe_create_otaa_row(row, cp_value='', as_value='', rf2_value='', add_c
   return [
     'CREATE_OTAA',
     row.get('DevEUI', ''),
-    safe_get(row, 'Dev_addr'),
+    safe_get(row, 'Dev_Addr'),
     'LORA/GenericA.1.0.2c_ETSI',
     row.get('AppEUI', ''),
     row.get('AppKey', ''),
